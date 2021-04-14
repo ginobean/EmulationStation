@@ -29,6 +29,9 @@
 
 bool scrape_cmdline = false;
 
+const int UI_GUI_FRAMERATE = 30;
+
+
 bool parseArgs(int argc, char* argv[])
 {
 	Utils::FileSystem::setExePath(argv[0]);
@@ -392,9 +395,13 @@ int main(int argc, char* argv[])
 	int ps_time = SDL_GetTicks();
 
 	bool running = true;
+    int millisecondsPerIteration = (int) (1000 / UI_GUI_FRAMERATE);
+    LOG(LogInfo) << " milliseconds per iteration = " << millisecondsPerIteration;
 
 	while(running)
 	{
+        SDL_Delay(millisecondsPerIteration);
+
 		SDL_Event event;
 		bool ps_standby = PowerSaver::getState() && (int) SDL_GetTicks() - ps_time > PowerSaver::getMode();
 
