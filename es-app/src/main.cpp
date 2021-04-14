@@ -29,8 +29,14 @@
 
 bool scrape_cmdline = false;
 
+// To handle UI GUI, polling at about 30 fps should yield fairly good
+// results.
+// For non-video screensavers, we should be able to go as low 1-2 fps.
+// This is desirable because the lower the fps, the less we poll and
+// hence the less CPU we need to use in idle mode.
+//
 const int UI_GUI_FRAMERATE = 30;
-
+const int UI_GUI_NON_VIDEO_SCREENSAVER_FRAMERATE = 2;
 
 bool parseArgs(int argc, char* argv[])
 {
@@ -395,12 +401,34 @@ int main(int argc, char* argv[])
 	int ps_time = SDL_GetTicks();
 
 	bool running = true;
-    int millisecondsPerIteration = (int) (1000 / UI_GUI_FRAMERATE);
-    LOG(LogInfo) << " milliseconds per iteration = " << millisecondsPerIteration;
+    bool prev_screen_saver_status = false;
+
+    int gui_poll_rate_ms = (int) (1000 / UI_GUI_FRAMERATE);
+    int gui_screensaver_poll_rate_ms = (int) (1000 / UI_GUI_NON_VIDEO_SCREENSAVER_FRAMERATE);
+    LOG(LogInfo) << " gui_poll_rate_ms = " << gui_poll_rate_ms;
+    LOG(LogInfo) << " gui_screensaver_poll_rate_ms = " << gui_screensaver_poll_rate_ms;
 
 	while(running)
 	{
-        SDL_Delay(millisecondsPerIteration);
+        bool currentScreenSaverStatus = screensaver.isScreenSaverActive();
+        if (currentScreenSaverStatus != prev_screen_saver_status) {
+            if (currentScreenSaverStatus) {
+                LOG(LogInfo) << " (screensaver is now ON..)";
+            }
+            else {
+                LOG(LogInfo) << " (screensaver is now OFF..)";
+            }
+
+            prev_screen_saver_status = currentScreenSaverStatus;
+        }
+
+        if (screensaver.isScreenSaverActive() && (! screensaver.isVideoScreensaver())) {
+                SDL_Delay(gui_screensaver_poll_rate_ms);
+            }
+
+            else {
+                SDL_Delay(gui_poll_rate_ms);
+            }
 
 		SDL_Event event;
 		bool ps_standby = PowerSaver::getState() && (int) SDL_GetTicks() - ps_time > PowerSaver::getMode();

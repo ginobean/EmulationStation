@@ -24,6 +24,8 @@ public:
 	virtual void update(int deltaTime);
 	virtual bool isScreenSaverActive();
 
+    bool isVideoScreensaver();
+
 	virtual FileData* getCurrentGame();
 	virtual void launchGame();
 	inline virtual void resetCounts() { mVideosCounted = false; mImagesCounted = false; };

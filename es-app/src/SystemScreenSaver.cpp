@@ -221,6 +221,15 @@ void SystemScreenSaver::stopScreenSaver()
 	PowerSaver::runningScreenSaver(false);
 }
 
+
+bool SystemScreenSaver::isVideoScreensaver()
+{
+	std::string screensaver_behavior = Settings::getInstance()->getString("ScreenSaverBehavior");
+    return (screensaver_behavior == "random video");
+}
+
+
+
 void SystemScreenSaver::renderScreenSaver()
 {
 	std::string screensaver_behavior = Settings::getInstance()->getString("ScreenSaverBehavior");
@@ -279,7 +288,7 @@ void SystemScreenSaver::backgroundIndexing()
 	// get the list of all games
 	SystemData* all = CollectionSystemManager::get()->getAllGamesCollection();
 	std::vector<FileData*> files = all->getRootFolder()->getFilesRecursive(GAME);
-	
+
 	const auto startTs = std::chrono::system_clock::now();
 	for (lastIndex; lastIndex < files.size(); lastIndex++)
 	{
@@ -291,7 +300,7 @@ void SystemScreenSaver::backgroundIndexing()
 		Utils::FileSystem::exists(files.at(lastIndex)->getImagePath());
 	}
 	auto endTs = std::chrono::system_clock::now();
-	LOG(LogDebug) << "Indexed a total of " << lastIndex << " entries in " << std::chrono::duration_cast<std::chrono::milliseconds>(endTs - startTs).count() << " ms. Stopping.";		
+	LOG(LogDebug) << "Indexed a total of " << lastIndex << " entries in " << std::chrono::duration_cast<std::chrono::milliseconds>(endTs - startTs).count() << " ms. Stopping.";
 }
 
 unsigned long SystemScreenSaver::countGameListNodes(const char *nodeName)
